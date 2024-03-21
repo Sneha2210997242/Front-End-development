@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculator</title>
+</head>
+<body>
+    <script>
+        function newElement(Element, Class, id, Value, parentid, ...attributes) {
+            var y = document.createElement(Element);
+            y.setAttribute("class", Class);
+            y.setAttribute("id", id);
+
+            if (attributes) {
+                y.type = attributes[0];
+                y.value = attributes[1];
+                if (attributes[1]) y.readOnly = attributes[2];
+            }
+
+            if (Value !== '\0') {
+                var text = document.createTextNode(Value);
+                y.appendChild(text);
+            }
+            if (parentid == '\0') {
+                document.body.appendChild(y);
+            } else {
+                var parent = document.getElementById(parentid);
+                parent.appendChild(y);
+            }
+        }
+
+        //creating Elements
+        newElement("div", "center", "center", '\0', '\0');
+        newElement("div", "board", 'board', '\0', "center");
+
+        newElement("div", "row", 'row0', "\0", 'board');
+        newElement("div", "row", 'row5', "\0", 'board');
+        newElement("div", "row", 'row1', "\0", 'board');
+        newElement("div", "row", 'row2', "\0", 'board');
+        newElement("div", "row", 'row3', "\0", 'board');
+        newElement("div", "row", 'row4', "\0", 'board');
+        newElement("div", "row", 'cart', "\0", 'board');
+
+        newElement("input", "src input", 'input', "\0", 'row0', "text", "Bharati", "true");
+
+        newElement("button", "button ", 'ac', "AC", 'row1');
+        newElement("button", "button ", 'c', "C", 'row1');
+        newElement("button", "operator button", '%', "%", 'row1');
+        newElement("button", "operator button", '', "", 'row1');
+
+        newElement("button", "button", '7', "7", 'row2');
+        newElement("button", "button", '8', "8", 'row2');
+        newElement("button", "button", '9', "9", 'row2');
+        newElement("button", "operator button", '-', "-", 'row2');
+
+        newElement("button", "button", '4', "4", 'row3');
+        newElement("button", "button", '5', "5", 'row3');
+        newElement("button", "button", '6', "6", 'row3');
+        newElement("button", "operator button", '+', "+", 'row3');
+
+        newElement("button", "button1 button", '0', "0", 'row4');
+        newElement("button", "button", '.', ".", 'row4');
+        newElement("button", "operator button", '=', "=", 'row4');
+
+        // Apply CSS styles using DOM
+        document.body.style.fontFamily = 'Arial, sans-serif';
+        document.body.style.margin = '0';
+        document.body.style.padding = '0';
+        document.body.style.display = 'flex';
+        document.body.style.justifyContent = 'center';
+        document.body.style.alignItems = 'center';
+        document.body.style.height = '100vh';
+        document.body.style.backgroundColor = '#f4f4f4';
+
+        document.querySelector(".center").style.textAlign = 'center';
+
+        var board = document.getElementById('board');
+        board.style.display = 'grid';
+        board.style.gridTemplateRows = 'repeat(6, 1fr)';
+        board.style.gap = '10px';
+        board.style.maxWidth = '400px';
+        board.style.margin = '0 auto';
+        board.style.padding = '20px';
+        board.style.backgroundColor = '#fff';
+        board.style.borderRadius = '10px';
+        board.style.boxShadow = '0 0 10px rgba(0, 0, 0, 0.1)';
+
+        var rows = document.querySelectorAll('.row');
+        rows.forEach(row => {
+            row.style.display = 'flex';
+            row.style.justifyContent = 'space-around';
+        });
+
+        var buttons = document.querySelectorAll('.button');
+        buttons.forEach(button => {
+            button.style.padding = '15px';
+            button.style.fontSize = '18px';
+            button.style.width = '23%';
+            button.style.textAlign = 'center';
+            button.style.cursor = 'pointer';
+            button.style.border = '1px solid #ccc';
+            button.style.borderRadius = '5px';
+            button.style.backgroundColor = '#eee';
+            button.style.transition = 'background-color 0.3s';
+        });
+
+        buttons.forEach(button => {
+            button.addEventListener('mouseover', function() {
+                button.style.backgroundColor = '#ddd';
+            });
+            button.addEventListener('mouseout', function() {
+                button.style.backgroundColor = '#eee';
+            });
+        });
+
+        document.querySelector(".operator").style.backgroundColor = '#f0ad4e';
+        document.querySelector(".operator").style.color = '#fff';
+
+        var input = document.getElementById('input');
+        input.style.width = '100%';
+        input.style.padding = '15px';
+        input.style.fontSize = '18px';
+        input.style.textAlign = 'right';
+        input.style.marginBottom = '15px';
+
+        // calculator logic
+        let str = "";
+        let textI = document.getElementById("input").style.textIndent;
+        let textindent = Number(textI.substring(0, textI.length - 3));
+        let opFound = false;
+        console.log(textI);
+
+        document.addEventListener('keydown', (e) => {
+            const key = e.key;
+
+            if (key.match(/[0-9]|[\+\-\*/%]/)) {
+                handleInput(key);
+            } else if (key === 'Enter') {
+                handleInput('=');
+            } else if (key === 'Backspace') {
+                handleInput('C');
+            } else if (key === 'Delete') {
+                handleInput('AC');
+            }
+        });
+
+        function handleInput(input) {
+            if (input === '=') {
+                textindent = 0;
+                str = eval(str);
+                if (isNaN(str))
+                    str = "Error";
+            } else if (input === 'AC') {
+                str = '0';
+                opFound = false;
+            } else if (input === 'C') {
+                str = str.substring(0, str.length - 1);
+                if (str === '') str = '0';
+            } else if ((input == '-' || input == '+' || input == '*' || input == '/' || input == '%') && !opFound) {
+                opFound = true;
+                str += input;
+            } else if ((input == '-' || input == '+' || input == '*' || input == '/' || input == '%') && opFound) {
+                str += '';
+            } else {
+                if (str == '0')
+                    str = input;
+                else {
+                    str += input;
+                    opFound = false;
+                }
+            }
+
+            document.querySelector(".input").value = str;
+        }
+    </script>
+</body>
+</html>
